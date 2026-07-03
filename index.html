@@ -83,6 +83,7 @@ h1.game-title{
   line-height:1.15;
 }
 .title-sub{color:var(--ink-soft);margin-bottom:30px;font-size:1rem;}
+.title-secret-code{color:var(--vermillion);font-weight:700;font-size:.85rem;margin:-22px 0 26px;min-height:0;}
 .stone-demo{display:flex;justify-content:center;gap:10px;margin:0 0 30px;}
 .stone-demo .stone{width:22px;height:22px;border-radius:50%;box-shadow:inset -3px -3px 5px rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.35);}
 .stone-demo .stone.b{background:radial-gradient(circle at 35% 30%,#555,#0A0A0A);}
@@ -166,12 +167,27 @@ h1.game-title{
 .side-panel .avatar-box{width:140px;height:180px;}
 .side-panel h3{margin:8px 0 4px;font-size:1.1rem;color:var(--ink);}
 .stage-label{color:var(--vermillion);font-size:.8rem;font-weight:700;margin-bottom:10px;}
+.speech-bubble{
+  position:relative;max-width:96%;margin:-4px auto 8px;padding:8px 12px;
+  background:var(--panel);border:2px solid var(--indigo);border-radius:12px;
+  font-size:.78rem;color:var(--ink);line-height:1.4;
+  opacity:0;transform:translateY(6px) scale(.96);
+  transition:opacity .25s ease, transform .25s ease;
+  pointer-events:none;min-height:0;
+}
+.speech-bubble.show{opacity:1;transform:translateY(0) scale(1);}
+.speech-bubble::after{
+  content:'';position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);
+  border-width:8px 7px 0 7px;border-style:solid;border-color:var(--indigo) transparent transparent transparent;
+}
+.modal-quote{font-style:italic;color:var(--indigo);font-weight:700;font-size:.9rem;margin:-14px 0 18px;}
 .turn-indicator{margin-top:6px;padding:10px;border-radius:8px;background:var(--panel-2);font-weight:700;font-size:.85rem;min-height:20px;}
 .turn-indicator.player{color:var(--indigo);}
 .turn-indicator.npc{color:var(--vermillion);}
 .side-coin{margin-top:12px;font-size:.78rem;color:var(--gold);font-weight:700;}
 .item-bar{margin-top:12px;}
 .item-btn{width:100%;background:var(--panel-2);color:var(--ink);border:2px solid var(--gold);border-radius:8px;padding:9px 8px;font-weight:700;font-size:.74rem;line-height:1.4;}
+.item-btn + .item-btn{margin-top:6px;}
 .item-btn:disabled{opacity:.4;cursor:not-allowed;}
 .item-btn.active{background:var(--gold);color:#FFF8EC;}
 .item-hint{margin-top:6px;font-size:.7rem;color:var(--vermillion);font-weight:700;min-height:14px;}
@@ -179,13 +195,14 @@ h1.game-title{
 /* ---------- OVERLAY / MODAL ---------- */
 .overlay{position:fixed;inset:0;background:rgba(20,14,6,.6);display:none;align-items:center;justify-content:center;z-index:50;padding:16px;}
 .overlay.active{display:flex;animation:fadeIn .3s ease;}
-.modal{background:var(--panel);border-radius:var(--radius-lg);padding:36px 30px;text-align:center;max-width:420px;width:100%;box-shadow:0 20px 50px rgba(43,35,24,.4);}
+.modal{background:var(--panel);border-radius:var(--radius-lg);padding:36px 30px;text-align:center;max-width:640px;width:100%;box-shadow:0 20px 50px rgba(43,35,24,.4);}
 .modal.win{border-top:5px solid var(--gold);}
 .modal.lose{border-top:5px solid var(--danger);}
 .modal.clear{border-top:5px solid var(--vermillion);}
+.modal.confirm{max-width:380px;}
 .modal h2{margin:0 0 6px;font-size:1.5rem;color:var(--ink);}
 .modal p{color:var(--ink-soft);font-size:.92rem;line-height:1.6;margin-bottom:22px;}
-.modal .avatar-box{width:150px;height:190px;margin:6px auto 18px;}
+.modal .avatar-box{width:300px;height:380px;max-width:80vw;max-height:48vh;margin:6px auto 18px;}
 .modal .coin-gain{color:var(--gold);font-weight:700;font-size:1rem;margin:-14px 0 18px;}
 
 /* ---------- GALLERY ---------- */
@@ -193,9 +210,12 @@ h1.game-title{
 .gallery-char h3{margin:0 0 10px;color:var(--ink);font-size:1.05rem;}
 .gallery-row{display:flex;gap:10px;flex-wrap:wrap;}
 .thumb{width:88px;height:112px;border-radius:8px;overflow:hidden;position:relative;background:var(--panel-2);border:1px solid rgba(107,74,38,.25);}
+.thumb.unlocked{cursor:pointer;transition:transform .15s ease;}
+.thumb.unlocked:hover{transform:translateY(-3px);border-color:var(--gold);}
 .thumb img{width:100%;height:100%;object-fit:contain;}
 .thumb .lock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(43,35,24,.55);color:#FFF8EC;font-size:1.3rem;}
 .thumb .stage-tag{position:absolute;bottom:0;left:0;right:0;background:rgba(43,35,24,.6);color:#FFF8EC;font-size:.6rem;text-align:center;padding:2px 0;}
+.code-input{width:100%;padding:12px;border-radius:8px;border:2px solid rgba(107,74,38,.3);font-size:1rem;text-align:center;margin-bottom:12px;background:var(--panel);color:var(--ink);font-family:inherit;}
 
 /* ---------- SHOP ---------- */
 .shop-card{background:var(--panel);border:1px solid rgba(107,74,38,.2);border-radius:var(--radius-lg);padding:24px;max-width:380px;margin:0 auto;text-align:center;box-shadow:0 6px 16px rgba(43,35,24,.08);}
@@ -215,6 +235,26 @@ h1.game-title{
 .upload-thumb .stage-tag{position:absolute;bottom:0;left:0;right:0;background:rgba(43,35,24,.6);color:#FFF8EC;font-size:.6rem;text-align:center;padding:2px 0;}
 .upload-msg{text-align:center;color:var(--vermillion);font-weight:700;font-size:.85rem;min-height:18px;margin-top:6px;}
 
+/* ---------- SETTINGS ---------- */
+.settings-block{max-width:560px;margin:0 auto 28px;background:var(--panel);border:1px solid rgba(107,74,38,.2);border-radius:var(--radius-lg);padding:20px 22px;box-shadow:0 6px 16px rgba(43,35,24,.08);}
+.settings-block h3{margin:0 0 14px;color:var(--ink);font-size:1.05rem;}
+.settings-note{color:var(--ink-soft);font-size:.78rem;line-height:1.6;margin:-6px 0 16px;}
+.volume-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.volume-row:last-child{margin-bottom:0;}
+.volume-label{width:96px;flex-shrink:0;font-size:.85rem;color:var(--ink);font-weight:700;}
+.volume-row input[type=range]{flex:1;accent-color:var(--vermillion);height:6px;}
+.volume-value{width:44px;flex-shrink:0;text-align:right;font-size:.8rem;color:var(--ink-soft);}
+.audio-setting-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:10px 0;border-bottom:1px dashed rgba(107,74,38,.2);}
+.audio-setting-row:last-child{border-bottom:none;}
+.audio-setting-label{width:100%;font-weight:700;color:var(--ink);font-size:.88rem;}
+.audio-setting-status{font-size:.75rem;color:var(--ink-soft);flex:1;min-width:80px;}
+.audio-setting-status.custom{color:var(--vermillion);font-weight:700;}
+.audio-btn-small{background:var(--panel-2);color:var(--ink);border:1.5px solid var(--gold);border-radius:6px;padding:6px 12px;font-size:.75rem;font-weight:700;}
+.audio-btn-small:hover{background:var(--gold);color:#FFF8EC;}
+.audio-upload-label{position:relative;display:inline-block;}
+.audio-upload-label input[type=file]{display:none;}
+.audio-reset-btn{background:none;border:none;color:var(--vermillion);font-size:.75rem;text-decoration:underline;padding:4px 2px;}
+
 /* ---------- ACCESSORY(未使用時の互換) ---------- */
 .acc{opacity:0;transform:scale(.6);transform-origin:100px 130px;transition:opacity .5s ease, transform .5s cubic-bezier(.34,1.56,.64,1);}
 .acc.show{opacity:1;transform:scale(1);}
@@ -222,12 +262,44 @@ h1.game-title{
 /* ---------- FOOTER NOTE ---------- */
 .foot-note{text-align:center;color:var(--ink-soft);font-size:.72rem;margin-top:26px;opacity:.7;}
 
+/* ---------- BGM TOGGLE ---------- */
+.bgm-toggle{
+  position:fixed;top:14px;right:14px;z-index:100;
+  width:44px;height:44px;border-radius:50%;
+  background:var(--panel);border:2px solid var(--gold);color:var(--gold);
+  font-size:1.15rem;box-shadow:0 4px 10px rgba(43,35,24,.2);
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity .15s ease, transform .15s ease;
+}
+.bgm-toggle:hover{transform:scale(1.06);}
+.bgm-toggle.muted{opacity:.4;}
+
+/* ---------- SAKURA PETALS ---------- */
+.sakura-layer{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:4;}
+.sakura-petal{
+  position:absolute;top:0;
+  background:radial-gradient(circle at 30% 30%, #FFE1EC, #F3A9C2 55%, #DE84AD);
+  border-radius:0 60% 0 60%;
+  animation-name:sakuraFall;
+  animation-timing-function:linear;
+  animation-fill-mode:forwards;
+  will-change:transform, opacity;
+}
+@keyframes sakuraFall{
+  0%{ transform:translate(0,-8vh) rotate(var(--rotate-start,0deg)); opacity:0; }
+  12%{ opacity:var(--max-op,0.8); }
+  85%{ opacity:var(--max-op,0.8); }
+  100%{ transform:translate(var(--drift,90px),112vh) rotate(calc(var(--rotate-start,0deg) + 340deg)); opacity:0; }
+}
+
 @media (max-width:640px){
   .side-panel{width:100%;}
 }
 </style>
 </head>
 <body>
+<button id="bgmToggle" class="bgm-toggle" title="BGMのオン/オフ">🎵</button>
+<div class="sakura-layer" id="sakuraLayer"></div>
 <div id="app">
 
   <!-- ============ TITLE ============ -->
@@ -239,6 +311,7 @@ h1.game-title{
       <div class="title-eyebrow">FIVE IN A ROW BATTLE</div>
       <h1 class="game-title display">五連の儀</h1>
       <p class="title-sub">五目並べで挑む、五番勝負の物語</p>
+      <p id="titleSecretCode" class="title-secret-code"></p>
       <div class="stone-demo">
         <div class="stone b"></div><div class="stone w"></div><div class="stone b"></div>
         <div class="stone w"></div><div class="stone b"></div>
@@ -247,8 +320,10 @@ h1.game-title{
       <div class="title-menu-row">
         <button class="btn-secondary" id="btnGallery">ギャラリー</button>
         <button class="btn-secondary" id="btnShop">ショップ</button>
-        <button class="btn-secondary" id="btnUploadMode">画像差し替え</button>
+        <button class="btn-secondary" id="btnUploadMode">画像差し替え 🔒</button>
+        <button class="btn-secondary" id="btnSettings">設定</button>
       </div>
+      <a class="reset-link" id="btnResetSaveTitle">セーブデータを初期化する</a>
     </div>
   </section>
 
@@ -274,14 +349,17 @@ h1.game-title{
         <div class="round-badge" id="roundBadge">ROUND 1 / 5</div>
         <div class="difficulty-label" id="difficultyLabel">強さ: ☆☆☆☆☆</div>
         <div class="avatar-box" id="battleAvatar"></div>
+        <div class="speech-bubble" id="battleSpeech"></div>
         <h3 id="battleCharName">-</h3>
         <div class="stage-label" id="battleStageLabel">私服</div>
         <div class="turn-indicator player" id="turnIndicator">あなたの番です</div>
         <div class="side-coin">💰 所持金: <span class="coin-value">0</span> 円</div>
         <div class="item-bar">
           <button class="item-btn" id="itemUseBtn">📖 イカサマの書（所持:0）</button>
+          <button class="item-btn" id="itemUseBtn2">🌀 神隠しの書（所持:0）</button>
           <div class="item-hint" id="itemHint"></div>
         </div>
+        <button class="btn-secondary" id="btnQuitGame" style="margin-top:14px;width:100%;padding:9px 10px;font-size:.82rem;">対局を中断してタイトルへ</button>
       </div>
     </div>
   </section>
@@ -295,7 +373,9 @@ h1.game-title{
     <div style="text-align:center;">
       <div class="avatar-box" id="clearAvatar" style="width:200px;height:260px;margin:0 auto 18px;"></div>
       <h3 id="clearCharName" style="font-size:1.4rem;"></h3>
-      <p style="color:var(--ink-soft);margin-bottom:26px;">五番の対局、すべて制した。見事な五連の儀であった。</p>
+      <p id="clearQuote" class="modal-quote" style="margin-top:8px;"></p>
+      <p style="color:var(--ink-soft);margin-bottom:10px;">五番の対局、すべて制した。見事な五連の儀であった。</p>
+      <p id="clearExtraNote" style="color:var(--vermillion);font-weight:700;font-size:.85rem;margin-bottom:26px;min-height:18px;"></p>
       <button class="btn-primary" id="btnClearToTitle">タイトルへ戻る</button>
     </div>
   </section>
@@ -316,20 +396,77 @@ h1.game-title{
       <h2 class="display">ショップ</h2>
       <p>所持金: <span class="coin-value">0</span> 円</p>
     </div>
-    <div class="shop-card">
+    <div class="shop-card" style="margin-bottom:16px;">
       <div class="shop-card-icon">📖</div>
       <h3>イカサマの書</h3>
-      <p>対戦中、自分の番に使うと、その手番中に一度だけ相手の石を自分の石に変えられる。最大3つまで持てる。</p>
+      <p>対戦中、自分の番に使うと、その手番中に一度だけ相手の石を自分の石に変えられる。最大1つまで持てる。</p>
       <div class="shop-card-row">
-        <span>所持数: <span id="ikasamaCount">0</span> / 3</span>
+        <span>所持数: <span id="ikasamaCount">0</span> / 1</span>
         <button class="btn-primary" id="btnBuyIkasama" style="padding:10px 22px;font-size:.9rem;">100円で購入</button>
       </div>
-      <p class="shop-msg" id="shopMsg"></p>
     </div>
+    <div class="shop-card">
+      <div class="shop-card-icon">🌀</div>
+      <h3>神隠しの書</h3>
+      <p>対戦中、自分の番に使うと、石を置く代わりに相手の石を2つ盤上から消せる。最大2つまで持てる。</p>
+      <div class="shop-card-row">
+        <span>所持数: <span id="kamikakushiCount">0</span> / 2</span>
+        <button class="btn-primary" id="btnBuyKamikakushi" style="padding:10px 22px;font-size:.9rem;">60円で購入</button>
+      </div>
+    </div>
+    <p class="shop-msg" id="shopMsg" style="max-width:380px;margin:12px auto 0;"></p>
     <div class="back-row">
       <button class="btn-secondary" id="btnShopBack">タイトルへ戻る</button><br>
       <a class="reset-link" id="btnResetSave">セーブデータを初期化する</a>
     </div>
+  </section>
+
+  <!-- ============ SETTINGS ============ -->
+  <section id="screen-settings" class="screen">
+    <div class="section-heading">
+      <h2 class="display">設定</h2>
+      <p>BGM・効果音の音量を調整したり、ご自分のmp3などの音源に差し替えたりできます。</p>
+    </div>
+
+    <div class="settings-block">
+      <h3>音量</h3>
+      <div class="volume-row">
+        <span class="volume-label">BGM音量</span>
+        <input type="range" id="bgmVolumeSlider" min="0" max="100" value="70">
+        <span class="volume-value" id="bgmVolumeValue">70%</span>
+      </div>
+      <div class="volume-row">
+        <span class="volume-label">効果音音量</span>
+        <input type="range" id="seVolumeSlider" min="0" max="100" value="80">
+        <span class="volume-value" id="seVolumeValue">80%</span>
+      </div>
+    </div>
+
+    <div class="settings-block">
+      <h3>音源の差し替え</h3>
+      <p class="settings-note">このHTMLファイルと同じ場所に「sounds」というフォルダを作り、以下の名前でmp3などの音声ファイルを置くと、画像と同じように自動的にそちらが優先して使われます(見つからない場合は自動生成された音のままです)。ファイルを追加した後は「再チェック」を押すか、ページを再読み込みしてください。</p>
+      <div id="audioSettingsContent"></div>
+      <div style="text-align:center;margin-top:14px;">
+        <button type="button" class="btn-secondary" id="btnRecheckSounds" style="font-size:.82rem;padding:9px 20px;">音声ファイルを再チェック</button>
+      </div>
+    </div>
+
+    <div class="back-row"><button class="btn-secondary" id="btnSettingsBack">タイトルへ戻る</button></div>
+  </section>
+
+  <!-- ============ 画像差し替え解放コード入力 ============ -->
+  <section id="screen-code" class="screen">
+    <div class="section-heading">
+      <h2 class="display">解放コード入力</h2>
+      <p>ある強敵を最後まで倒すと知ることができる、合言葉を入力してください。</p>
+    </div>
+    <p id="codeHintText" style="text-align:center;color:var(--ink-soft);font-size:.8rem;margin:-18px 0 18px;">ヒント：狐柏（こはく）を最後まで倒すと...</p>
+    <div style="max-width:320px;margin:0 auto;text-align:center;">
+      <input type="text" id="codeInput" class="code-input" placeholder="コードを入力">
+      <p class="shop-msg" id="codeMsg"></p>
+      <button class="btn-primary" id="btnSubmitCode" style="width:100%;">解放する</button>
+    </div>
+    <div class="back-row"><button class="btn-secondary" id="btnCodeBack">タイトルへ戻る</button></div>
   </section>
 
   <!-- ============ UPLOAD MODE ============ -->
@@ -343,6 +480,7 @@ h1.game-title{
     <div class="back-row"><button class="btn-secondary" id="btnUploadBack">タイトルへ戻る</button></div>
   </section>
 
+
   <p class="foot-note">HTML / CSS / JavaScript のみで動作するシングルファイルゲームです。画像や所持金はこの端末のブラウザ内に保存されます。</p>
 </div>
 
@@ -354,6 +492,226 @@ h1.game-title{
 <script>
 (function(){
 "use strict";
+
+/* =========================================================
+   効果音 & BGM
+   デフォルトはWebAudio APIでその場で生成(音声ファイル不要)。
+   images/ と同じ考え方で、sounds/ フォルダに決まったファイル名でmp3等を
+   置いておくと、存在チェックのうえで自動的にそちらが優先再生される。
+========================================================= */
+let audioCtx = null;
+let bgmStarted = false;
+let bgmAudioEl = null;
+
+function seVol(base){ return base * (save.volumes ? save.volumes.se : 1); }
+function bgmVol(base){ return base * (save.volumes ? save.volumes.bgm : 1); }
+
+/* 差し替え用に読み込むファイルパス(同じフォルダに sounds/ を作ってこの名前で置く) */
+const SOUND_FILES = {
+  bgm:    'sounds/bgm.mp3',
+  stone:  'sounds/stone.mp3',
+  click:  'sounds/click.mp3',
+  remove: 'sounds/remove.mp3',
+  chime:  'sounds/chime.mp3',
+  win:    'sounds/win.mp3',
+  lose:   'sounds/lose.mp3'
+};
+/* 各ファイルが実際に読み込めるかどうか(true/false/undefined=確認中) */
+const soundAvailable = {};
+
+function checkSoundFile(key){
+  try{
+    const a = new Audio();
+    a.preload = 'auto';
+    a.addEventListener('canplaythrough', ()=>{
+      if(soundAvailable[key]) return;
+      soundAvailable[key] = true;
+      if(key==='bgm') ensureBgmAudioEl();
+      if(typeof refreshSoundStatusUI==='function') refreshSoundStatusUI();
+    }, {once:true});
+    a.addEventListener('error', ()=>{
+      soundAvailable[key] = false;
+      if(typeof refreshSoundStatusUI==='function') refreshSoundStatusUI();
+    }, {once:true});
+    a.src = SOUND_FILES[key];
+    a.load();
+  }catch(e){ soundAvailable[key] = false; }
+}
+Object.keys(SOUND_FILES).forEach(checkSoundFile);
+
+/* sounds/ にファイルが見つかっていればそれを再生する。再生できればtrueを返す */
+function playCustomSE(key){
+  if(soundAvailable[key]!==true) return false;
+  try{
+    const a = new Audio(SOUND_FILES[key]);
+    a.volume = Math.max(0, Math.min(1, save.volumes ? save.volumes.se : 1));
+    a.play().catch(()=>{});
+    return true;
+  }catch(e){ return false; }
+}
+
+/* BGM用の<audio>要素を用意し、sounds/bgm.mp3 が見つかっていればそれを再生/一時停止する */
+function ensureBgmAudioEl(){
+  if(!bgmAudioEl){
+    bgmAudioEl = new Audio();
+    bgmAudioEl.loop = true;
+  }
+  if(soundAvailable.bgm===true){
+    if(!bgmAudioEl.src || bgmAudioEl.src.indexOf(SOUND_FILES.bgm)===-1){ bgmAudioEl.src = SOUND_FILES.bgm; }
+    bgmAudioEl.volume = Math.max(0, Math.min(1, save.volumes ? save.volumes.bgm : 1));
+    if(save.bgmOn){
+      if(bgmAudioEl.paused){ bgmAudioEl.play().catch(()=>{}); }
+    } else if(!bgmAudioEl.paused){
+      bgmAudioEl.pause();
+    }
+  } else if(!bgmAudioEl.paused){
+    bgmAudioEl.pause();
+  }
+}
+
+function getAudioCtx(){
+  if(!audioCtx){
+    try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
+    catch(e){ return null; }
+  }
+  if(audioCtx.state==='suspended'){ audioCtx.resume().catch(()=>{}); }
+  if(audioCtx && !bgmStarted){
+    bgmStarted = true;
+    scheduleBgmNote();
+  }
+  ensureBgmAudioEl();
+  return audioCtx;
+}
+function playTone(freq, endFreq, duration, type, volume){
+  const ctx = getAudioCtx();
+  if(!ctx || volume<=0) return;
+  try{
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, now);
+    if(endFreq){ osc.frequency.exponentialRampToValueAtTime(endFreq, now+duration); }
+    gain.gain.setValueAtTime(volume, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now+duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now+duration+0.02);
+  }catch(e){ /* 再生できない環境では無音のまま続行 */ }
+}
+function playNoiseBurst(duration, volume, filterFreq, filterQ){
+  const ctx = getAudioCtx();
+  if(!ctx || volume<=0) return;
+  try{
+    const now = ctx.currentTime;
+    const bufferSize = Math.max(1, Math.floor(ctx.sampleRate*duration));
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for(let i=0;i<bufferSize;i++){ data[i] = (Math.random()*2-1) * (1 - i/bufferSize); }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = filterFreq;
+    filter.Q.value = filterQ;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(volume, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now+duration);
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    noise.start(now);
+  }catch(e){ /* ignore */ }
+}
+/* 碁石が盤にあたる「カチッ」という音(高音の鋭いクリック+フィルターしたノイズの打撃音) */
+function playStoneSound(){
+  if(playCustomSE('stone')) return;
+  playTone(1500, 500, 0.028, 'square', seVol(0.16));
+  playNoiseBurst(0.035, seVol(0.30), 2600, 1.4);
+}
+/* ボタンをクリックした時の軽い音 */
+function playClickSound(){
+  if(playCustomSE('click')) return;
+  playTone(700, null, 0.05, 'sine', seVol(0.10));
+}
+/* アイテムで石を消した時の音 */
+function playRemoveSound(){
+  if(playCustomSE('remove')) return;
+  playTone(320, 70, 0.16, 'sawtooth', seVol(0.16));
+}
+/* ショップ購入などの軽い通知音 */
+function playChimeSound(){
+  if(playCustomSE('chime')) return;
+  playTone(660, 990, 0.18, 'sine', seVol(0.14));
+}
+/* 勝利時の音(和風スケールで駆け上がる) */
+function playWinSound(){
+  if(playCustomSE('win')) return;
+  const notes = [523.25, 587.33, 698.46, 880.00, 1046.50];
+  notes.forEach((f,i)=> setTimeout(()=> playTone(f, null, 0.22, 'triangle', seVol(0.16)), i*90));
+}
+/* 敗北時の音(重く沈むような下降音) */
+function playLoseSound(){
+  if(playCustomSE('lose')) return;
+  const notes = [392.00, 349.23, 293.66, 220.00];
+  notes.forEach((f,i)=> setTimeout(()=> playTone(f, f*0.85, 0.32, 'sawtooth', seVol(0.13)), i*160));
+}
+
+/* すべてのボタンクリックに共通で軽いクリック音を鳴らす */
+document.addEventListener('click', (e)=>{
+  if(e.target.closest('button')) playClickSound();
+});
+
+/* ---- 和風BGM(琴の音をイメージした生成メロディ・ループ)。カスタムBGMがある場合は鳴らさない ---- */
+/* 平調子(琴でよく使われる和風の五音音階)に近い周波数列 */
+const KOTO_SCALE = [220.00, 246.94, 293.66, 329.63, 349.23, 440.00, 493.88, 587.33, 659.25];
+/* 曲想(音階の添字 / null=休符, 長さ秒, 音量) をゆったりしたフレーズとして用意 */
+const BGM_PHRASE = [
+  {i:0,d:1.1,v:0.05},{i:2,d:0.7,v:0.045},{i:3,d:1.3,v:0.055},{i:null,d:0.6},
+  {i:4,d:0.8,v:0.05},{i:3,d:0.7,v:0.04},{i:2,d:1.4,v:0.05},{i:null,d:0.7},
+  {i:5,d:1.0,v:0.055},{i:4,d:0.7,v:0.045},{i:3,d:1.6,v:0.05},{i:null,d:0.9},
+  {i:2,d:0.9,v:0.045},{i:0,d:1.5,v:0.05},{i:null,d:1.2},
+  {i:6,d:0.9,v:0.05},{i:5,d:0.8,v:0.045},{i:3,d:1.8,v:0.055},{i:null,d:1.4}
+];
+let bgmStep = 0;
+function playKotoPluck(freq, duration, volume){
+  const ctx = getAudioCtx();
+  if(!ctx || volume<=0) return;
+  try{
+    const now = ctx.currentTime;
+    const osc1 = ctx.createOscillator();
+    osc1.type = 'triangle';
+    osc1.frequency.setValueAtTime(freq, now);
+    const osc2 = ctx.createOscillator();
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(freq*2, now);
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 3200;
+    const gain1 = ctx.createGain();
+    gain1.gain.setValueAtTime(0.0001, now);
+    gain1.gain.linearRampToValueAtTime(volume, now+0.01);
+    gain1.gain.exponentialRampToValueAtTime(0.0001, now+duration);
+    const gain2 = ctx.createGain();
+    gain2.gain.setValueAtTime(0.0001, now);
+    gain2.gain.linearRampToValueAtTime(volume*0.22, now+0.008);
+    gain2.gain.exponentialRampToValueAtTime(0.0001, now+duration*0.55);
+    osc1.connect(filter); filter.connect(gain1); gain1.connect(ctx.destination);
+    osc2.connect(gain2); gain2.connect(ctx.destination);
+    osc1.start(now); osc1.stop(now+duration+0.05);
+    osc2.start(now); osc2.stop(now+duration*0.6+0.05);
+  }catch(e){ /* ignore */ }
+}
+function scheduleBgmNote(){
+  const step = BGM_PHRASE[bgmStep % BGM_PHRASE.length];
+  bgmStep++;
+  const hasFileBgm = soundAvailable.bgm===true;
+  if(save.bgmOn && !hasFileBgm && step.i!==null && step.i!==undefined){
+    playKotoPluck(KOTO_SCALE[step.i], step.d*0.95, bgmVol(step.v));
+  }
+  setTimeout(scheduleBgmNote, step.d*1000);
+}
 
 /* =========================================================
    キャラクターデータ
@@ -386,7 +744,7 @@ const CHARACTERS = [
     ]
   },
   {
-    id:'midori', name:'ミドリ', desc:'森の精霊に育てられた狩人。静かな闘志を秘める。強さの目安:ふつう〜つよい',
+    id:'midori', name:'狐柏（こはく）', desc:'元気いっぱいで包容力のある優しいお姉さん。可愛いものとペンギンが大好き。強さの目安:ふつう〜つよい',
     theme:{dress:'#2F8F55'},
     images:['images/midori_0.png','images/midori_1.png','images/midori_2.png','images/midori_3.png','images/midori_4.png','images/midori_5.png'],
     /* ROUND1〜5、少し強化 */
@@ -401,9 +759,96 @@ const CHARACTERS = [
 ];
 
 const STAGE_LABELS = ['私服','衣装 段階1','衣装 段階2','衣装 段階3','衣装 段階4','衣装 完全開放'];
+
+/* =========================================================
+   対戦中のセリフ
+   battle: 対局中にランダムで表示 / win: このキャラが負けた時 / lose: このキャラが勝った時
+========================================================= */
+const DIALOGUE = {
+  luna:{
+    battle:[
+      '月が見てるわよ','次の一手、読めてる?','焦らなくていいわ','夜はまだ長いのよ',
+      '…悪くない手ね','私を甘く見ないで','月光の下、負けられないの','冷静に、いくわよ',
+      'その手は読み済みよ','静かにいくわ','星々が味方してる','ふふ、面白いじゃない',
+      'この局面、嫌いじゃないわ','一手一手、丁寧にね','私に隙はないわよ','夜風が心地いいわね',
+      'さあ、続けましょう','動じないわよ、私は','月に誓って、負けない','その程度かしら?',
+      '次はどう出るの?','静寂を楽しんでる','私のペースよ','少し本気出そうかな',
+      '闇はまだ深いわ','落ち着いていきましょう','この一手、覚えておいて','夜長は嫌いじゃないの',
+      '…なるほどね','まだまだこれからよ'
+    ],
+    win:[
+      '…完敗ね、認めるわ','やるじゃない','今日は月に免じて負けを認めるわ','次は容赦しないから',
+      '悔しいけど…お見事よ','ふ、たまにはこういう夜もあるわね','私としたことが…','この借りはいつか返すわよ'
+    ],
+    lose:[
+      'まだまだね','月には届かなかったようね','次はもう少し粘ってほしいわ','これが私の実力よ',
+      'ふふ、当然の結果ね','夜はまだ終わらないわよ','焦りすぎたんじゃない?','また挑んでくるといいわ'
+    ]
+  },
+  hikari:{
+    battle:[
+      'いっくよー!','その手、読んでたー!','太陽みたいに熱くいこう!','うんうん、いい感じ!',
+      '次はどうする?','楽しくなってきた!','負けないぞー!','ここ、狙ってたところ!',
+      'えへへ、作戦通り','まぶしいでしょ、私の手!','もっと本気出しちゃう?','この調子この調子!',
+      '太陽サンサン、絶好調!','むむ、なかなかやるね','諦めが悪いのが取り柄なの!','よーし、いくよー!',
+      'その一手、キラリと光るね','さぁ勝負しよ!','私、策士なんだから','油断は禁物だよねー',
+      'ここぞという時が来た!','がんばえー、私!','次で決めちゃうかも!','熱くなってきたね!',
+      '笑顔で頑張るのが私流!','この盤面、燃えてきた!','うーん、悩ましいなぁ','勝っても負けても楽しもう!',
+      'さてさて、どう出る?','まだまだこれからだよ!'
+    ],
+    win:[
+      '負けちゃったぁ〜','うぅ、悔しいけど楽しかった!','次は絶対勝つからね!','やられたぁ、お見事!',
+      '太陽もたまには曇るよね…','くぅ〜、いい勝負だった!','今日はあなたの日だね!','また挑戦させて!'
+    ],
+    lose:[
+      'まだまだだね!','えへへ、勝っちゃった!','作戦通り!','次はもっと頑張って!',
+      '太陽には敵わないよ!','楽勝楽勝!','もう一回やる?','私、意外とやるでしょ?'
+    ]
+  },
+  midori:{
+    battle:[
+      'よーし、いくよ〜!','うんうん、その調子その調子','あ、そこ狙ってたんだけどなぁ','ふふ、なかなかやるじゃん',
+      'ペンギンさんも応援してくれてる気がする','焦らなくて大丈夫、ゆっくりいこ?','あ…しまった、って、まだ大丈夫かな','かわいい手だね、その一手',
+      '私も本気出しちゃおうかな〜','うーん、悩んじゃうなぁ','ここ、ちょっと危ないかも','大丈夫大丈夫、落ち着いて',
+      'えへへ、楽しくなってきた','その調子でいこっか','あ、うっかりしてた…','私、こう見えて真剣なんだよ?',
+      'ふふ、次はどう来るかな','がんばれ〜自分','この盤面、なんかかわいく見えてきた','ちょっと本気モード入るね',
+      '焦らせないでよ〜','うんっ、いい流れかも','私、意外と負けず嫌いなんだ','ふふ、油断してないもん',
+      'あれ、これ思ったより難しいかも','ペンギン柄の靴下、履いてきたんだ','そろそろ本気、出しちゃおっかな','大丈夫、まだまだ楽しめるよ',
+      'うんうん、いい勝負だね','…ちょっとドキドキしてきちゃった'
+    ],
+    /* ラウンド(1〜5)ごとの敗北時セリフ。狐柏が負けた時=プレイヤー勝利時に、ラウンド数に応じて表示 */
+    win:[
+      'え〜負けちゃった!でも楽しかったよ〜',
+      'むぅ、やられちゃったね。次は本気出すから!',
+      'うわぁ、やるじゃん…ちょっと悔しいかも',
+      'ここまで来たかぁ。あなた、なかなかやるね',
+      '…負けちゃった。ここまで来られたの、あなたが初めてだよ'
+    ],
+    lose:[
+      'えへへ、勝っちゃった。でも良い勝負だったよ','ナイスファイト!また挑んできてね','ふふ、私もまだまだ本気だよ?','大丈夫、次はきっといけるよ',
+      'うんうん、頑張ったね偉い偉い','私の勝ち〜。でも紙一重だったよ','また一緒に遊ぼ、次は負けないから','ちょっと照れちゃうな、褒めてくれてもいいのに'
+    ]
+  }
+};
+function randomLine(charId, category){
+  const arr = DIALOGUE[charId] && DIALOGUE[charId][category];
+  if(!arr || arr.length===0) return '';
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+/* 「win」カテゴリ(=そのキャラが負けた時)のセリフを取得。
+   狐柏(midori)はラウンド数に応じた専用セリフを順番に使う */
+function winQuoteFor(charId, round){
+  if(charId==='midori' && DIALOGUE.midori.win.length>=5){
+    return DIALOGUE.midori.win[Math.min(Math.max(round,1),5)-1];
+  }
+  return randomLine(charId, 'win');
+}
 const ITEM_PRICE = 100;
-const ITEM_MAX = 3;
+const ITEM_MAX = 1;
+const KAMI_PRICE = 60;
+const KAMI_MAX = 2;
 const WIN_REWARD = 10;
+const UNLOCK_CODE = 'goren';
 
 /* =========================================================
    セーブデータ(localStorage永続化。取得できない環境ではメモリのみ)
@@ -413,6 +858,10 @@ function defaultSave(){
   return {
     coins:0,
     ikasama:0,
+    kamikakushi:0,
+    uploadUnlocked:false,
+    bgmOn:true,
+    volumes:{bgm:0.7, se:0.8},
     maxStage:{luna:0,hikari:0,midori:0},
     customImages:{luna:[null,null,null,null,null,null],hikari:[null,null,null,null,null,null],midori:[null,null,null,null,null,null]}
   };
@@ -425,6 +874,13 @@ function loadSave(){
     const base = defaultSave();
     base.coins = typeof parsed.coins==='number' ? parsed.coins : base.coins;
     base.ikasama = typeof parsed.ikasama==='number' ? parsed.ikasama : base.ikasama;
+    base.kamikakushi = typeof parsed.kamikakushi==='number' ? parsed.kamikakushi : base.kamikakushi;
+    base.uploadUnlocked = !!parsed.uploadUnlocked;
+    base.bgmOn = typeof parsed.bgmOn==='boolean' ? parsed.bgmOn : base.bgmOn;
+    if(parsed.volumes){
+      if(typeof parsed.volumes.bgm==='number') base.volumes.bgm = Math.max(0,Math.min(1,parsed.volumes.bgm));
+      if(typeof parsed.volumes.se==='number') base.volumes.se = Math.max(0,Math.min(1,parsed.volumes.se));
+    }
     Object.assign(base.maxStage, parsed.maxStage||{});
     Object.keys(base.customImages).forEach(id=>{
       if(parsed.customImages && Array.isArray(parsed.customImages[id])){
@@ -484,7 +940,9 @@ let state = {
   cellEls:[],
   playerColor:1,
   aiColor:2,
-  itemMode:false
+  itemMode:false,
+  itemTargetsLeft:0,
+  itemUsedThisActivation:false
 };
 
 /* =========================================================
@@ -493,6 +951,56 @@ let state = {
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  if(id==='screen-game'){ startSakura(); } else { stopSakura(); }
+  updateSecretCodeDisplays();
+}
+
+/* 狐柏(こはく)を最終ラウンドまで倒すと合言葉を各所に表示する */
+function updateSecretCodeDisplays(){
+  const beaten = (save.maxStage.midori||0) >= 5;
+  const titleEl = document.getElementById('titleSecretCode');
+  if(titleEl) titleEl.textContent = beaten ? '合言葉は「Goren」' : '';
+  const codeHintEl = document.getElementById('codeHintText');
+  if(codeHintEl){
+    codeHintEl.textContent = beaten
+      ? '合言葉は「Goren」'
+      : 'ヒント：狐柏（こはく）を最後まで倒すと...';
+  }
+}
+
+/* =========================================================
+   桜吹雪エフェクト(対戦画面のみ、少量が斜めに舞う)
+========================================================= */
+let sakuraInterval = null;
+function spawnSakuraPetal(){
+  const layer = document.getElementById('sakuraLayer');
+  if(!layer) return;
+  const petal = document.createElement('div');
+  petal.className = 'sakura-petal';
+  const size = 9 + Math.random()*9;
+  const duration = 9 + Math.random()*7;
+  const drift = 70 + Math.random()*110;
+  const rotateStart = Math.random()*360;
+  const maxOpacity = (0.45 + Math.random()*0.35).toFixed(2);
+  petal.style.left = (Math.random()*100)+'vw';
+  petal.style.width = size+'px';
+  petal.style.height = size+'px';
+  petal.style.setProperty('--drift', drift+'px');
+  petal.style.setProperty('--rotate-start', rotateStart+'deg');
+  petal.style.setProperty('--max-op', maxOpacity);
+  petal.style.animationDuration = duration+'s';
+  layer.appendChild(petal);
+  setTimeout(()=>{ petal.remove(); }, duration*1000+300);
+}
+function startSakura(){
+  if(sakuraInterval) return;
+  spawnSakuraPetal();
+  sakuraInterval = setInterval(spawnSakuraPetal, 1400); /* 少量なので間隔をあけて生成 */
+}
+function stopSakura(){
+  if(sakuraInterval){ clearInterval(sakuraInterval); sakuraInterval = null; }
+  const layer = document.getElementById('sakuraLayer');
+  if(layer) layer.innerHTML = '';
 }
 
 /* =========================================================
@@ -598,6 +1106,8 @@ function resetBoardState(){
   }));
   state.active = true;
   state.itemMode = false;
+  state.itemTargetsLeft = 0;
+  state.itemUsedThisActivation = false;
   document.getElementById('board').classList.remove('disabled');
   const hint = document.getElementById('itemHint');
   if(hint) hint.textContent = '';
@@ -615,6 +1125,22 @@ function startNewGame(charIndex){
   beginRound();
 }
 
+let speechTimer = null;
+function showSpeech(text, duration){
+  const el = document.getElementById('battleSpeech');
+  if(!el || !text) return;
+  el.textContent = text;
+  el.classList.add('show');
+  clearTimeout(speechTimer);
+  speechTimer = setTimeout(()=>{ el.classList.remove('show'); }, duration||3200);
+}
+function hideSpeech(){
+  const el = document.getElementById('battleSpeech');
+  if(!el) return;
+  clearTimeout(speechTimer);
+  el.classList.remove('show');
+}
+
 function beginRound(){
   resetBoardState();
   const ch = CHARACTERS[state.charIndex];
@@ -629,6 +1155,8 @@ function beginRound(){
   document.getElementById('battleStageLabel').textContent = STAGE_LABELS[state.stage];
   buildAvatar(document.getElementById('battleAvatar'), ch.id, state.stage);
   refreshCoinDisplays();
+  hideSpeech();
+  setTimeout(()=> showSpeech(randomLine(ch.id,'battle'), 3600), 500);
 
   if(playerFirst){
     setTurnIndicator('player');
@@ -679,6 +1207,7 @@ function placeStone(r,c,colorValue){
   const stone = document.createElement('div');
   stone.className = 'stone';
   pt.appendChild(stone);
+  playStoneSound();
 }
 
 function onCellClick(r,c){
@@ -781,6 +1310,9 @@ function aiMove(){
 
   placeStone(move.r, move.c, state.aiColor);
   document.getElementById('board').classList.remove('disabled');
+  if(Math.random() < 0.45){
+    showSpeech(randomLine(CHARACTERS[state.charIndex].id, 'battle'));
+  }
   if(checkWin(state.board, move.r, move.c, state.aiColor)){
     endRound(false);
     return;
@@ -804,34 +1336,60 @@ function endDraw(){
 }
 
 /* =========================================================
-   アイテム「イカサマの書」
+   アイテム「イカサマの書」「神隠しの書」
 ========================================================= */
 function updateItemBar(){
-  const btn = document.getElementById('itemUseBtn');
+  const btnI = document.getElementById('itemUseBtn');
+  const btnK = document.getElementById('itemUseBtn2');
   const hint = document.getElementById('itemHint');
-  if(!btn) return;
+  if(!btnI || !btnK) return;
   const hasAiStone = state.board.length>0 && state.board.some(row=>row.some(v=>v===state.aiColor));
-  const usable = state.active && state.turn==='player' && save.ikasama>0 && hasAiStone;
-  btn.disabled = !usable && !state.itemMode;
-  btn.classList.toggle('active', state.itemMode);
-  btn.textContent = state.itemMode
+  const baseUsable = state.active && state.turn==='player' && hasAiStone;
+  const usableI = baseUsable && save.ikasama>0;
+  const usableK = baseUsable && save.kamikakushi>0;
+
+  btnI.disabled = !usableI && state.itemMode!=='ikasama';
+  btnK.disabled = !usableK && state.itemMode!=='kamikakushi' && !(state.itemMode==='kamikakushi' && state.itemUsedThisActivation);
+  btnI.classList.toggle('active', state.itemMode==='ikasama');
+  btnK.classList.toggle('active', state.itemMode==='kamikakushi');
+  btnI.textContent = state.itemMode==='ikasama'
     ? 'キャンセル（イカサマ中断）'
     : `📖 イカサマの書（所持:${save.ikasama}）`;
+  if(state.itemMode==='kamikakushi'){
+    btnK.textContent = state.itemUsedThisActivation
+      ? `ここで終了する（あと${state.itemTargetsLeft}個消せます）`
+      : 'キャンセル（神隠し中断）';
+  } else {
+    btnK.textContent = `🌀 神隠しの書（所持:${save.kamikakushi}）`;
+  }
   if(!state.itemMode) hint.textContent = '';
 }
 
-function toggleItemMode(){
-  if(state.itemMode){
-    state.itemMode = false;
-    setStealableHighlight(false);
-    updateItemBar();
+function toggleItemMode(type){
+  if(state.itemMode===type){
+    if(type==='kamikakushi' && state.itemUsedThisActivation){
+      /* すでに1個以上消している場合はキャンセルではなく、そこで手番を終える */
+      finalizeItemTurn();
+    } else {
+      state.itemMode = false;
+      state.itemTargetsLeft = 0;
+      state.itemUsedThisActivation = false;
+      setStealableHighlight(false);
+      updateItemBar();
+    }
     return;
   }
-  if(!state.active || state.turn!=='player' || save.ikasama<=0) return;
+  if(!state.active || state.turn!=='player') return;
+  const count = type==='ikasama' ? save.ikasama : save.kamikakushi;
+  if(count<=0) return;
   const hasAiStone = state.board.some(row=>row.some(v=>v===state.aiColor));
   if(!hasAiStone) return;
-  state.itemMode = true;
-  document.getElementById('itemHint').textContent = '相手の石をクリックすると、自分の石に変えられます';
+  state.itemMode = type;
+  state.itemTargetsLeft = type==='kamikakushi' ? 2 : 1;
+  state.itemUsedThisActivation = false;
+  document.getElementById('itemHint').textContent = type==='ikasama'
+    ? '相手の石をクリックすると、自分の石に変えられます'
+    : '相手の石をクリックすると、盤上から消せます（最大2個）';
   setStealableHighlight(true);
   updateItemBar();
 }
@@ -846,29 +1404,63 @@ function setStealableHighlight(on){
   }
 }
 
-function handleItemTargetClick(r,c){
-  if(state.board[r][c] !== state.aiColor) return;
-  state.board[r][c] = state.playerColor;
-  const pt = state.cellEls[r][c];
-  pt.classList.remove(stoneClassOf(state.aiColor));
-  pt.classList.add(stoneClassOf(state.playerColor));
-  pt.innerHTML = '';
-  const stone = document.createElement('div');
-  stone.className = 'stone';
-  pt.appendChild(stone);
-
-  save.ikasama = Math.max(0, save.ikasama - 1);
-  persistSave();
+function finalizeItemTurn(winCheckColor, wr, wc){
   state.itemMode = false;
+  state.itemTargetsLeft = 0;
+  state.itemUsedThisActivation = false;
   setStealableHighlight(false);
   document.getElementById('itemHint').textContent = '';
 
-  if(checkWin(state.board, r, c, state.playerColor)){ endRound(true); return; }
+  if(winCheckColor!==undefined && checkWin(state.board, wr, wc, winCheckColor)){ endRound(true); return; }
   if(isBoardFull()){ endDraw(); return; }
   state.turn = 'ai';
   setTurnIndicator('ai');
   document.getElementById('board').classList.add('disabled');
   setTimeout(aiMove, 550);
+}
+
+function handleItemTargetClick(r,c){
+  if(state.board[r][c] !== state.aiColor) return;
+  const usedMode = state.itemMode;
+  const pt = state.cellEls[r][c];
+
+  if(usedMode==='ikasama'){
+    state.board[r][c] = state.playerColor;
+    pt.classList.remove(stoneClassOf(state.aiColor));
+    pt.classList.add(stoneClassOf(state.playerColor));
+    pt.innerHTML = '';
+    const stone = document.createElement('div');
+    stone.className = 'stone';
+    pt.appendChild(stone);
+    playStoneSound();
+    save.ikasama = Math.max(0, save.ikasama - 1);
+    persistSave();
+    finalizeItemTurn(state.playerColor, r, c);
+    return;
+  }
+
+  if(usedMode==='kamikakushi'){
+    state.board[r][c] = 0;
+    pt.classList.remove('filled', stoneClassOf(state.aiColor));
+    pt.innerHTML = '';
+    playRemoveSound();
+    if(!state.itemUsedThisActivation){
+      save.kamikakushi = Math.max(0, save.kamikakushi - 1);
+      state.itemUsedThisActivation = true;
+    }
+    persistSave();
+    state.itemTargetsLeft -= 1;
+
+    const hasMoreAiStone = state.board.some(row=>row.some(v=>v===state.aiColor));
+    if(state.itemTargetsLeft>0 && hasMoreAiStone){
+      setStealableHighlight(true);
+      document.getElementById('itemHint').textContent = `相手の石をクリックすると、盤上から消せます（あと${state.itemTargetsLeft}個）`;
+      updateItemBar();
+      return;
+    }
+    finalizeItemTurn();
+    return;
+  }
 }
 
 /* =========================================================
@@ -877,6 +1469,8 @@ function handleItemTargetClick(r,c){
 function endRound(playerWon){
   state.active = false;
   state.itemMode = false;
+  state.itemTargetsLeft = 0;
+  state.itemUsedThisActivation = false;
   document.getElementById('board').classList.add('disabled');
   const ch = CHARACTERS[state.charIndex];
 
@@ -886,12 +1480,19 @@ function endRound(playerWon){
     save.maxStage[ch.id] = Math.max(save.maxStage[ch.id]||0, state.stage);
     persistSave();
     refreshCoinDisplays();
+    playWinSound();
 
     const isFinal = state.round >= 5;
     if(isFinal){
       setTimeout(()=>{
         buildAvatar(document.getElementById('clearAvatar'), ch.id, state.stage);
         document.getElementById('clearCharName').textContent = `${ch.name} - ${STAGE_LABELS[state.stage]}`;
+        document.getElementById('clearQuote').textContent = `「${winQuoteFor(ch.id, state.round)}」`;
+        if(ch.id==='midori'){
+          document.getElementById('clearExtraNote').textContent = '合言葉は「Goren」。タイトルの「画像差し替え」から入力してみよう。';
+        } else {
+          document.getElementById('clearExtraNote').textContent = '';
+        }
         showScreen('screen-clear');
       }, 300);
       return;
@@ -900,6 +1501,7 @@ function endRound(playerWon){
       type:'win',
       title:`勝利！ ROUND ${state.round} クリア`,
       desc:`${ch.name} の衣装が変化した…「${STAGE_LABELS[state.stage]}」`,
+      quote:winQuoteFor(ch.id, state.round),
       coinGain:`+${WIN_REWARD}円 獲得！（所持金: ${save.coins}円）`,
       buttonText:'次の対戦へ',
       onConfirm:()=>{
@@ -912,10 +1514,12 @@ function endRound(playerWon){
       avatarStage:state.stage
     });
   } else {
+    playLoseSound();
     openModal({
       type:'lose',
       title:'敗北…',
       desc:`${ch.name} に敗れた。儀式はここで途切れる。`,
+      quote:randomLine(ch.id,'lose'),
       buttonText:'タイトルへ戻る',
       onConfirm:()=>{ closeModal(); showScreen('screen-title'); },
       showAvatar:false
@@ -926,13 +1530,14 @@ function endRound(playerWon){
 /* =========================================================
    モーダル
 ========================================================= */
-function openModal({type,title,desc,coinGain,buttonText,onConfirm,showAvatar,avatarCharId,avatarStage}){
+function openModal({type,title,desc,coinGain,quote,buttonText,onConfirm,showAvatar,avatarCharId,avatarStage}){
   const overlay = document.getElementById('overlay');
   const modal = document.getElementById('modalContent');
   modal.className = 'modal ' + type;
   modal.innerHTML = `
     ${showAvatar ? '<div class="avatar-box" id="modalAvatar"></div>' : ''}
     <h2 class="display">${title}</h2>
+    ${quote ? `<p class="modal-quote">「${quote}」</p>` : ''}
     <p>${desc}</p>
     ${coinGain ? `<p class="coin-gain">${coinGain}</p>` : ''}
     <button class="btn-primary" id="modalBtn">${buttonText}</button>
@@ -945,6 +1550,25 @@ function openModal({type,title,desc,coinGain,buttonText,onConfirm,showAvatar,ava
 }
 function closeModal(){
   document.getElementById('overlay').classList.remove('active');
+}
+
+/* ブラウザ標準のconfirm()はサンドボックス化された表示環境では動作しないため、
+   同じオーバーレイを使った独自の確認ダイアログを用意する */
+function showConfirmDialog(message, onYes){
+  const overlay = document.getElementById('overlay');
+  const modal = document.getElementById('modalContent');
+  modal.className = 'modal confirm';
+  modal.innerHTML = `
+    <h2 class="display">確認</h2>
+    <p>${message}</p>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn-secondary" id="confirmNoBtn">キャンセル</button>
+      <button class="btn-primary" id="confirmYesBtn" style="padding:12px 26px;font-size:1rem;">はい</button>
+    </div>
+  `;
+  document.getElementById('confirmYesBtn').addEventListener('click', ()=>{ closeModal(); onYes(); }, {once:true});
+  document.getElementById('confirmNoBtn').addEventListener('click', closeModal, {once:true});
+  overlay.classList.add('active');
 }
 
 /* =========================================================
@@ -961,7 +1585,7 @@ function renderGallery(){
     for(let s=0;s<6;s++){
       const isLocked = s>unlocked;
       thumbsHtml += `
-        <div class="thumb">
+        <div class="thumb${isLocked?'':' unlocked'}" data-char="${ch.id}" data-stage="${s}">
           ${isLocked ? '' : `<img src="${getCharImage(ch.id,s)}" alt="${ch.name} ${STAGE_LABELS[s]}" onerror="this.style.display='none';">`}
           ${isLocked ? '<div class="lock">🔒</div>' : ''}
           <div class="stage-tag">${STAGE_LABELS[s]}</div>
@@ -970,6 +1594,26 @@ function renderGallery(){
     block.innerHTML = `<h3>${ch.name}</h3><div class="gallery-row">${thumbsHtml}</div>`;
     wrap.appendChild(block);
   });
+  wrap.querySelectorAll('.thumb.unlocked').forEach(thumb=>{
+    thumb.addEventListener('click', ()=>{
+      openGalleryLightbox(thumb.dataset.char, parseInt(thumb.dataset.stage,10));
+    });
+  });
+}
+
+function openGalleryLightbox(charId, stage){
+  const ch = getCharacterById(charId);
+  const overlay = document.getElementById('overlay');
+  const modal = document.getElementById('modalContent');
+  modal.className = 'modal lightbox';
+  modal.innerHTML = `
+    <div class="avatar-box"></div>
+    <h2 class="display">${ch.name} - ${STAGE_LABELS[stage]}</h2>
+    <button class="btn-secondary" id="modalBtn">閉じる</button>
+  `;
+  buildAvatar(modal.querySelector('.avatar-box'), charId, stage);
+  document.getElementById('modalBtn').addEventListener('click', closeModal, {once:true});
+  overlay.classList.add('active');
 }
 
 /* =========================================================
@@ -978,18 +1622,31 @@ function renderGallery(){
 function renderShop(){
   refreshCoinDisplays();
   document.getElementById('ikasamaCount').textContent = save.ikasama;
+  document.getElementById('kamikakushiCount').textContent = save.kamikakushi;
   document.getElementById('shopMsg').textContent = '';
-  const btn = document.getElementById('btnBuyIkasama');
-  btn.disabled = save.ikasama>=ITEM_MAX || save.coins<ITEM_PRICE;
+  document.getElementById('btnBuyIkasama').disabled = save.ikasama>=ITEM_MAX || save.coins<ITEM_PRICE;
+  document.getElementById('btnBuyKamikakushi').disabled = save.kamikakushi>=KAMI_MAX || save.coins<KAMI_PRICE;
 }
 function buyIkasama(){
   const msg = document.getElementById('shopMsg');
-  if(save.ikasama>=ITEM_MAX){ msg.textContent = 'すでに最大数(3つ)持っています。'; return; }
+  if(save.ikasama>=ITEM_MAX){ msg.textContent = 'イカサマの書はすでに最大数(1つ)持っています。'; return; }
   if(save.coins<ITEM_PRICE){ msg.textContent = '所持金が足りません。'; return; }
   save.coins -= ITEM_PRICE;
   save.ikasama += 1;
   persistSave();
   msg.textContent = '「イカサマの書」を購入しました。';
+  playChimeSound();
+  renderShop();
+}
+function buyKamikakushi(){
+  const msg = document.getElementById('shopMsg');
+  if(save.kamikakushi>=KAMI_MAX){ msg.textContent = '神隠しの書はすでに最大数(2つ)持っています。'; return; }
+  if(save.coins<KAMI_PRICE){ msg.textContent = '所持金が足りません。'; return; }
+  save.coins -= KAMI_PRICE;
+  save.kamikakushi += 1;
+  persistSave();
+  msg.textContent = '「神隠しの書」を購入しました。';
+  playChimeSound();
   renderShop();
 }
 
@@ -1054,6 +1711,58 @@ function renderUploadMode(){
 }
 
 /* =========================================================
+   設定画面(音量・音源の差し替え)
+========================================================= */
+const AUDIO_SETTINGS_ITEMS = [
+  {key:'bgm',    label:'BGM(琴風の曲)',            test:null},
+  {key:'stone',  label:'碁石を置く音',              test:()=>playStoneSound()},
+  {key:'click',  label:'ボタンクリック音',          test:()=>playClickSound()},
+  {key:'remove', label:'石を消す音(神隠しの書)',    test:()=>playRemoveSound()},
+  {key:'chime',  label:'購入音',                    test:()=>playChimeSound()},
+  {key:'win',    label:'勝利音',                    test:()=>playWinSound()},
+  {key:'lose',   label:'敗北音',                    test:()=>playLoseSound()}
+];
+
+function renderSettings(){
+  document.getElementById('bgmVolumeSlider').value = Math.round(save.volumes.bgm*100);
+  document.getElementById('bgmVolumeValue').textContent = Math.round(save.volumes.bgm*100)+'%';
+  document.getElementById('seVolumeSlider').value = Math.round(save.volumes.se*100);
+  document.getElementById('seVolumeValue').textContent = Math.round(save.volumes.se*100)+'%';
+
+  const wrap = document.getElementById('audioSettingsContent');
+  wrap.innerHTML = '';
+  AUDIO_SETTINGS_ITEMS.forEach(item=>{
+    const status = soundAvailable[item.key];
+    const statusText = status===true ? `検出済み(${SOUND_FILES[item.key]})`
+      : status===false ? 'ファイル未検出 → 自動生成音を使用中'
+      : '確認中…';
+    const row = document.createElement('div');
+    row.className = 'audio-setting-row';
+    row.innerHTML = `
+      <span class="audio-setting-label">${item.label}<br><span style="font-weight:400;font-size:.72rem;color:var(--ink-soft);">${SOUND_FILES[item.key]}</span></span>
+      <span class="audio-setting-status${status===true?' custom':''}">${statusText}</span>
+      ${item.test ? `<button type="button" class="audio-btn-small" data-audio-test="${item.key}">試聴</button>` : ''}
+    `;
+    wrap.appendChild(row);
+  });
+
+  wrap.querySelectorAll('[data-audio-test]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const item = AUDIO_SETTINGS_ITEMS.find(x=>x.key===btn.dataset.audioTest);
+      if(item && item.test) item.test();
+    });
+  });
+}
+function refreshSoundStatusUI(){
+  const screen = document.getElementById('screen-settings');
+  if(screen && screen.classList.contains('active')) renderSettings();
+}
+function recheckAllSoundFiles(){
+  Object.keys(SOUND_FILES).forEach(key=>{ soundAvailable[key] = undefined; checkSoundFile(key); });
+  renderSettings();
+}
+
+/* =========================================================
    ナビゲーション用イベント
 ========================================================= */
 document.getElementById('btnStart').addEventListener('click', ()=>{
@@ -1075,25 +1784,107 @@ document.getElementById('btnShop').addEventListener('click', ()=>{
 });
 document.getElementById('btnShopBack').addEventListener('click', ()=> showScreen('screen-title'));
 document.getElementById('btnBuyIkasama').addEventListener('click', buyIkasama);
+document.getElementById('btnBuyKamikakushi').addEventListener('click', buyKamikakushi);
+function resetAllSaveData(){
+  save = defaultSave();
+  persistSave();
+  refreshCoinDisplays();
+  updateUploadButtonLabel();
+  if(document.getElementById('screen-shop').classList.contains('active')) renderShop();
+}
 document.getElementById('btnResetSave').addEventListener('click', (e)=>{
   e.preventDefault();
-  if(confirm('所持金・アイテム・解放済みギャラリー・アップロード画像をすべて初期化します。よろしいですか？')){
-    save = defaultSave();
-    persistSave();
-    renderShop();
-    refreshCoinDisplays();
-  }
+  showConfirmDialog('所持金・アイテム・解放済みギャラリー・アップロード画像をすべて初期化します。よろしいですか？', resetAllSaveData);
+});
+document.getElementById('btnResetSaveTitle').addEventListener('click', (e)=>{
+  e.preventDefault();
+  showConfirmDialog('所持金・アイテム・解放済みギャラリー・アップロード画像をすべて初期化します。よろしいですか？', resetAllSaveData);
 });
 
+function updateUploadButtonLabel(){
+  document.getElementById('btnUploadMode').textContent = save.uploadUnlocked ? '画像差し替え' : '画像差し替え 🔒';
+}
+updateUploadButtonLabel();
+
 document.getElementById('btnUploadMode').addEventListener('click', ()=>{
-  renderUploadMode();
-  showScreen('screen-upload');
+  if(save.uploadUnlocked){
+    renderUploadMode();
+    showScreen('screen-upload');
+  } else {
+    document.getElementById('codeInput').value = '';
+    document.getElementById('codeMsg').textContent = '';
+    showScreen('screen-code');
+  }
 });
 document.getElementById('btnUploadBack').addEventListener('click', ()=> showScreen('screen-title'));
 
-document.getElementById('itemUseBtn').addEventListener('click', toggleItemMode);
+document.getElementById('btnCodeBack').addEventListener('click', ()=> showScreen('screen-title'));
+function submitUnlockCode(){
+  const val = document.getElementById('codeInput').value.trim().toLowerCase();
+  if(val === UNLOCK_CODE){
+    save.uploadUnlocked = true;
+    persistSave();
+    updateUploadButtonLabel();
+    renderUploadMode();
+    showScreen('screen-upload');
+  } else {
+    document.getElementById('codeMsg').textContent = 'コードが違います。';
+  }
+}
+document.getElementById('btnSubmitCode').addEventListener('click', submitUnlockCode);
+document.getElementById('codeInput').addEventListener('keydown', (e)=>{
+  if(e.key==='Enter') submitUnlockCode();
+});
+
+document.getElementById('itemUseBtn').addEventListener('click', ()=> toggleItemMode('ikasama'));
+document.getElementById('itemUseBtn2').addEventListener('click', ()=> toggleItemMode('kamikakushi'));
+
+document.getElementById('btnQuitGame').addEventListener('click', ()=>{
+  showConfirmDialog('対局を中断してタイトルに戻ります。よろしいですか？（この対局の進行は失われます）', ()=>{
+    state.active = false;
+    state.itemMode = false;
+    showScreen('screen-title');
+  });
+});
 
 refreshCoinDisplays();
+
+document.getElementById('btnSettings').addEventListener('click', ()=>{
+  renderSettings();
+  showScreen('screen-settings');
+});
+document.getElementById('btnSettingsBack').addEventListener('click', ()=> showScreen('screen-title'));
+document.getElementById('btnRecheckSounds').addEventListener('click', recheckAllSoundFiles);
+
+const bgmSlider = document.getElementById('bgmVolumeSlider');
+const seSlider = document.getElementById('seVolumeSlider');
+bgmSlider.addEventListener('input', (e)=>{
+  save.volumes.bgm = (+e.target.value)/100;
+  document.getElementById('bgmVolumeValue').textContent = e.target.value+'%';
+  if(bgmAudioEl){ bgmAudioEl.volume = save.volumes.bgm; }
+});
+bgmSlider.addEventListener('change', persistSave);
+seSlider.addEventListener('input', (e)=>{
+  save.volumes.se = (+e.target.value)/100;
+  document.getElementById('seVolumeValue').textContent = e.target.value+'%';
+});
+seSlider.addEventListener('change', ()=>{ persistSave(); playClickSound(); });
+
+function updateBgmToggleUI(){
+  const btn = document.getElementById('bgmToggle');
+  if(!btn) return;
+  btn.textContent = save.bgmOn ? '🎵' : '🔇';
+  btn.classList.toggle('muted', !save.bgmOn);
+  btn.title = save.bgmOn ? 'BGMをオフにする' : 'BGMをオンにする';
+}
+document.getElementById('bgmToggle').addEventListener('click', ()=>{
+  save.bgmOn = !save.bgmOn;
+  persistSave();
+  updateBgmToggleUI();
+  getAudioCtx(); /* まだ開始していなければここでBGMループを起動する */
+});
+updateBgmToggleUI();
+updateSecretCodeDisplays();
 
 })();
 </script>
