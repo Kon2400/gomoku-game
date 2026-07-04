@@ -357,6 +357,7 @@ h1.game-title{
         <div class="item-bar">
           <button class="item-btn" id="itemUseBtn">📖 イカサマの書（所持:0）</button>
           <button class="item-btn" id="itemUseBtn2">🌀 神隠しの書（所持:0）</button>
+          <button class="item-btn" id="itemUseBtn3">⏪ 巻き戻しの書（所持:0）</button>
           <div class="item-hint" id="itemHint"></div>
         </div>
         <button class="btn-secondary" id="btnQuitGame" style="margin-top:14px;width:100%;padding:9px 10px;font-size:.82rem;">対局を中断してタイトルへ</button>
@@ -405,13 +406,22 @@ h1.game-title{
         <button class="btn-primary" id="btnBuyIkasama" style="padding:10px 22px;font-size:.9rem;">100円で購入</button>
       </div>
     </div>
-    <div class="shop-card">
+    <div class="shop-card" style="margin-bottom:16px;">
       <div class="shop-card-icon">🌀</div>
       <h3>神隠しの書</h3>
       <p>対戦中、自分の番に使うと、石を置く代わりに相手の石を2つ盤上から消せる。最大2つまで持てる。</p>
       <div class="shop-card-row">
         <span>所持数: <span id="kamikakushiCount">0</span> / 2</span>
         <button class="btn-primary" id="btnBuyKamikakushi" style="padding:10px 22px;font-size:.9rem;">60円で購入</button>
+      </div>
+    </div>
+    <div class="shop-card">
+      <div class="shop-card-icon">⏪</div>
+      <h3>巻き戻しの書</h3>
+      <p>対戦中、自分の番に使うと、盤面を4手前(それより前がなければ遡れるところまで)の状態まで巻き戻せる。最大3つまで持てる。</p>
+      <div class="shop-card-row">
+        <span>所持数: <span id="rewindCount">0</span> / 3</span>
+        <button class="btn-primary" id="btnBuyRewind" style="padding:10px 22px;font-size:.9rem;">30円で購入</button>
       </div>
     </div>
     <p class="shop-msg" id="shopMsg" style="max-width:380px;margin:12px auto 0;"></p>
@@ -512,6 +522,7 @@ const SOUND_FILES = {
   stone:  'sounds/stone.mp3',
   click:  'sounds/click.mp3',
   remove: 'sounds/remove.mp3',
+  rewind: 'sounds/rewind.mp3',
   chime:  'sounds/chime.mp3',
   win:    'sounds/win.mp3',
   lose:   'sounds/lose.mp3'
@@ -639,6 +650,11 @@ function playClickSound(){
 function playRemoveSound(){
   if(playCustomSE('remove')) return;
   playTone(320, 70, 0.16, 'sawtooth', seVol(0.16));
+}
+/* 巻き戻しの書を使った時の音(時間が巻き戻る感じの上昇音) */
+function playRewindSound(){
+  if(playCustomSE('rewind')) return;
+  playTone(260, 640, 0.22, 'sine', seVol(0.15));
 }
 /* ショップ購入などの軽い通知音 */
 function playChimeSound(){
@@ -847,6 +863,8 @@ const ITEM_PRICE = 100;
 const ITEM_MAX = 1;
 const KAMI_PRICE = 60;
 const KAMI_MAX = 2;
+const REWIND_PRICE = 30;
+const REWIND_MAX = 3;
 const WIN_REWARD = 10;
 const UNLOCK_CODE = 'goren';
 
@@ -859,6 +877,7 @@ function defaultSave(){
     coins:0,
     ikasama:0,
     kamikakushi:0,
+    rewind:0,
     uploadUnlocked:false,
     bgmOn:true,
     volumes:{bgm:0.7, se:0.8},
@@ -875,6 +894,7 @@ function loadSave(){
     base.coins = typeof parsed.coins==='number' ? parsed.coins : base.coins;
     base.ikasama = typeof parsed.ikasama==='number' ? parsed.ikasama : base.ikasama;
     base.kamikakushi = typeof parsed.kamikakushi==='number' ? parsed.kamikakushi : base.kamikakushi;
+    base.rewind = typeof parsed.rewind==='number' ? parsed.rewind : base.rewind;
     base.uploadUnlocked = !!parsed.uploadUnlocked;
     base.bgmOn = typeof parsed.bgmOn==='boolean' ? parsed.bgmOn : base.bgmOn;
     if(parsed.volumes){
@@ -942,7 +962,9 @@ let state = {
   aiColor:2,
   itemMode:false,
   itemTargetsLeft:0,
-  itemUsedThisActivation:false
+  itemUsedThisActivation:false,
+  moveHistory:[],
+  turnHistory:[]
 };
 
 /* =========================================================
@@ -1108,6 +1130,8 @@ function resetBoardState(){
   state.itemMode = false;
   state.itemTargetsLeft = 0;
   state.itemUsedThisActivation = false;
+  state.moveHistory = [];
+  state.turnHistory = [];
   document.getElementById('board').classList.remove('disabled');
   const hint = document.getElementById('itemHint');
   if(hint) hint.textContent = '';
@@ -1200,7 +1224,14 @@ function checkWin(board, r, c, player){
   return false;
 }
 
+function recordHistoryStep(actingSide){
+  state.moveHistory.push(state.board.map(row=>row.slice()));
+  state.turnHistory.push(actingSide);
+  if(state.moveHistory.length>60){ state.moveHistory.shift(); state.turnHistory.shift(); }
+}
+
 function placeStone(r,c,colorValue){
+  recordHistoryStep(colorValue===state.playerColor ? 'player' : 'ai');
   state.board[r][c] = colorValue;
   const pt = state.cellEls[r][c];
   pt.classList.add('filled', stoneClassOf(colorValue));
@@ -1341,15 +1372,18 @@ function endDraw(){
 function updateItemBar(){
   const btnI = document.getElementById('itemUseBtn');
   const btnK = document.getElementById('itemUseBtn2');
+  const btnR = document.getElementById('itemUseBtn3');
   const hint = document.getElementById('itemHint');
-  if(!btnI || !btnK) return;
+  if(!btnI || !btnK || !btnR) return;
   const hasAiStone = state.board.length>0 && state.board.some(row=>row.some(v=>v===state.aiColor));
   const baseUsable = state.active && state.turn==='player' && hasAiStone;
   const usableI = baseUsable && save.ikasama>0;
   const usableK = baseUsable && save.kamikakushi>0;
+  const usableR = state.active && state.turn==='player' && !state.itemMode && save.rewind>0 && state.moveHistory.length>0;
 
   btnI.disabled = !usableI && state.itemMode!=='ikasama';
   btnK.disabled = !usableK && state.itemMode!=='kamikakushi' && !(state.itemMode==='kamikakushi' && state.itemUsedThisActivation);
+  btnR.disabled = !usableR;
   btnI.classList.toggle('active', state.itemMode==='ikasama');
   btnK.classList.toggle('active', state.itemMode==='kamikakushi');
   btnI.textContent = state.itemMode==='ikasama'
@@ -1362,6 +1396,7 @@ function updateItemBar(){
   } else {
     btnK.textContent = `🌀 神隠しの書（所持:${save.kamikakushi}）`;
   }
+  btnR.textContent = `⏪ 巻き戻しの書（所持:${save.rewind}）`;
   if(!state.itemMode) hint.textContent = '';
 }
 
@@ -1419,12 +1454,66 @@ function finalizeItemTurn(winCheckColor, wr, wc){
   setTimeout(aiMove, 550);
 }
 
+/* 盤面の内部状態(state.board)に合わせて、見た目(DOM)だけを丸ごと再構築する */
+function rebuildBoardVisualsFromState(){
+  for(let r=0;r<BOARD_SIZE;r++){
+    for(let c=0;c<BOARD_SIZE;c++){
+      const pt = state.cellEls[r][c];
+      pt.className = 'point';
+      pt.innerHTML = '';
+      const v = state.board[r][c];
+      if(v!==0){
+        pt.classList.add('filled', stoneClassOf(v));
+        const stone = document.createElement('div');
+        stone.className = 'stone';
+        pt.appendChild(stone);
+      }
+    }
+  }
+}
+
+/* 「巻き戻しの書」: 4手前(なければ遡れるだけ)の盤面まで戻す */
+function useRewindItem(){
+  if(!state.active || state.turn!=='player' || state.itemMode) return;
+  if(save.rewind<=0) return;
+  if(state.moveHistory.length===0) return;
+
+  const stepsBack = Math.min(4, state.moveHistory.length);
+  const targetIndex = state.moveHistory.length - stepsBack;
+  const restoredBoard = state.moveHistory[targetIndex];
+  const restoredTurn = state.turnHistory[targetIndex] || (isPlayerFirstRound(state.round) ? 'player' : 'ai');
+
+  state.moveHistory = state.moveHistory.slice(0, targetIndex);
+  state.turnHistory = state.turnHistory.slice(0, targetIndex);
+  state.board = restoredBoard.map(row=>row.slice());
+  rebuildBoardVisualsFromState();
+
+  save.rewind = Math.max(0, save.rewind - 1);
+  persistSave();
+  playRewindSound();
+
+  state.itemMode = false;
+  setStealableHighlight(false);
+  document.getElementById('itemHint').textContent = '';
+
+  state.turn = restoredTurn;
+  if(state.turn==='player'){
+    setTurnIndicator('player');
+    document.getElementById('board').classList.remove('disabled');
+  } else {
+    setTurnIndicator('ai');
+    document.getElementById('board').classList.add('disabled');
+    setTimeout(aiMove, 550);
+  }
+}
+
 function handleItemTargetClick(r,c){
   if(state.board[r][c] !== state.aiColor) return;
   const usedMode = state.itemMode;
   const pt = state.cellEls[r][c];
 
   if(usedMode==='ikasama'){
+    recordHistoryStep('player');
     state.board[r][c] = state.playerColor;
     pt.classList.remove(stoneClassOf(state.aiColor));
     pt.classList.add(stoneClassOf(state.playerColor));
@@ -1440,6 +1529,7 @@ function handleItemTargetClick(r,c){
   }
 
   if(usedMode==='kamikakushi'){
+    recordHistoryStep('player');
     state.board[r][c] = 0;
     pt.classList.remove('filled', stoneClassOf(state.aiColor));
     pt.innerHTML = '';
@@ -1522,6 +1612,8 @@ function endRound(playerWon){
       quote:randomLine(ch.id,'lose'),
       buttonText:'タイトルへ戻る',
       onConfirm:()=>{ closeModal(); showScreen('screen-title'); },
+      secondaryButtonText:'もう一度挑戦する',
+      onSecondary:()=>{ closeModal(); state.round = 1; state.stage = 0; beginRound(); },
       showAvatar:false
     });
   }
@@ -1530,7 +1622,7 @@ function endRound(playerWon){
 /* =========================================================
    モーダル
 ========================================================= */
-function openModal({type,title,desc,coinGain,quote,buttonText,onConfirm,showAvatar,avatarCharId,avatarStage}){
+function openModal({type,title,desc,coinGain,quote,buttonText,onConfirm,secondaryButtonText,onSecondary,showAvatar,avatarCharId,avatarStage}){
   const overlay = document.getElementById('overlay');
   const modal = document.getElementById('modalContent');
   modal.className = 'modal ' + type;
@@ -1540,12 +1632,18 @@ function openModal({type,title,desc,coinGain,quote,buttonText,onConfirm,showAvat
     ${quote ? `<p class="modal-quote">「${quote}」</p>` : ''}
     <p>${desc}</p>
     ${coinGain ? `<p class="coin-gain">${coinGain}</p>` : ''}
-    <button class="btn-primary" id="modalBtn">${buttonText}</button>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      ${secondaryButtonText ? `<button class="btn-secondary" id="modalBtnSecondary" style="padding:14px 26px;">${secondaryButtonText}</button>` : ''}
+      <button class="btn-primary" id="modalBtn">${buttonText}</button>
+    </div>
   `;
   if(showAvatar){
     buildAvatar(document.getElementById('modalAvatar'), avatarCharId, avatarStage);
   }
   document.getElementById('modalBtn').addEventListener('click', onConfirm, {once:true});
+  if(secondaryButtonText){
+    document.getElementById('modalBtnSecondary').addEventListener('click', onSecondary, {once:true});
+  }
   overlay.classList.add('active');
 }
 function closeModal(){
@@ -1623,9 +1721,11 @@ function renderShop(){
   refreshCoinDisplays();
   document.getElementById('ikasamaCount').textContent = save.ikasama;
   document.getElementById('kamikakushiCount').textContent = save.kamikakushi;
+  document.getElementById('rewindCount').textContent = save.rewind;
   document.getElementById('shopMsg').textContent = '';
   document.getElementById('btnBuyIkasama').disabled = save.ikasama>=ITEM_MAX || save.coins<ITEM_PRICE;
   document.getElementById('btnBuyKamikakushi').disabled = save.kamikakushi>=KAMI_MAX || save.coins<KAMI_PRICE;
+  document.getElementById('btnBuyRewind').disabled = save.rewind>=REWIND_MAX || save.coins<REWIND_PRICE;
 }
 function buyIkasama(){
   const msg = document.getElementById('shopMsg');
@@ -1646,6 +1746,17 @@ function buyKamikakushi(){
   save.kamikakushi += 1;
   persistSave();
   msg.textContent = '「神隠しの書」を購入しました。';
+  playChimeSound();
+  renderShop();
+}
+function buyRewind(){
+  const msg = document.getElementById('shopMsg');
+  if(save.rewind>=REWIND_MAX){ msg.textContent = '巻き戻しの書はすでに最大数(3つ)持っています。'; return; }
+  if(save.coins<REWIND_PRICE){ msg.textContent = '所持金が足りません。'; return; }
+  save.coins -= REWIND_PRICE;
+  save.rewind += 1;
+  persistSave();
+  msg.textContent = '「巻き戻しの書」を購入しました。';
   playChimeSound();
   renderShop();
 }
@@ -1718,6 +1829,7 @@ const AUDIO_SETTINGS_ITEMS = [
   {key:'stone',  label:'碁石を置く音',              test:()=>playStoneSound()},
   {key:'click',  label:'ボタンクリック音',          test:()=>playClickSound()},
   {key:'remove', label:'石を消す音(神隠しの書)',    test:()=>playRemoveSound()},
+  {key:'rewind', label:'巻き戻す音(巻き戻しの書)',  test:()=>playRewindSound()},
   {key:'chime',  label:'購入音',                    test:()=>playChimeSound()},
   {key:'win',    label:'勝利音',                    test:()=>playWinSound()},
   {key:'lose',   label:'敗北音',                    test:()=>playLoseSound()}
@@ -1785,6 +1897,7 @@ document.getElementById('btnShop').addEventListener('click', ()=>{
 document.getElementById('btnShopBack').addEventListener('click', ()=> showScreen('screen-title'));
 document.getElementById('btnBuyIkasama').addEventListener('click', buyIkasama);
 document.getElementById('btnBuyKamikakushi').addEventListener('click', buyKamikakushi);
+document.getElementById('btnBuyRewind').addEventListener('click', buyRewind);
 function resetAllSaveData(){
   save = defaultSave();
   persistSave();
@@ -1838,6 +1951,7 @@ document.getElementById('codeInput').addEventListener('keydown', (e)=>{
 
 document.getElementById('itemUseBtn').addEventListener('click', ()=> toggleItemMode('ikasama'));
 document.getElementById('itemUseBtn2').addEventListener('click', ()=> toggleItemMode('kamikakushi'));
+document.getElementById('itemUseBtn3').addEventListener('click', useRewindItem);
 
 document.getElementById('btnQuitGame').addEventListener('click', ()=>{
   showConfirmDialog('対局を中断してタイトルに戻ります。よろしいですか？（この対局の進行は失われます）', ()=>{
